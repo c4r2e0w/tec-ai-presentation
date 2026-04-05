@@ -692,6 +692,39 @@
       transition: width 500ms ease;
     }
 
+    .study-progress {
+      display: grid;
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .study-progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .study-progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .study-progress-fill {
+      height: 100%;
+      width: 72%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--amber), var(--cyan));
+      box-shadow: 0 0 20px rgba(109, 226, 255, 0.2);
+    }
+
     .nav {
       display: flex;
       align-items: center;
@@ -1020,17 +1053,26 @@
             <div class="toolbar"><span></span><span></span><span></span></div>
             <h3 style="margin: 4px 0 6px;">Цифровая обучающая система</h3>
             <div class="mini-grid">
-              <div class="metric"><strong>Модуль</strong><span>Питательный электронасос</span></div>
-              <div class="metric"><strong>Прогресс</strong><span>Изучено 72%</span></div>
+              <div class="metric"><strong>Модуль</strong><span>Производственные инструкции</span></div>
+              <div class="metric"><strong>Тема</strong><span>Питательный насос</span></div>
               <div class="metric"><strong>Статус</strong><span>Повторить защиты ПЭН</span></div>
             </div>
-            <div class="chat-lines">
+            <div class="study-progress">
+              <div class="study-progress-row">
+                <span>Прогресс изучения</span>
+                <strong>72%</strong>
+              </div>
+              <div class="study-progress-track">
+                <div class="study-progress-fill"></div>
+              </div>
+            </div>
+            <div class="chat-lines live-chat">
               <div class="bubble user">Какие защиты есть на питательном насосе?</div>
               <div class="bubble assistant">Защиты ПЭН. Насос отключается при:</div>
               <div class="bubble assistant">- повышении давления за гидропятой - 12 кгс/см²;<br>- срабатывании защиты электродвигателя;<br>- падении давления на нагнетании ПЭН - 130 кгс/см²;<br>- падении давления масла на смазку - 0,3 кгс/см²;<br>- неоткрытии вентиля рециркуляции ПЭН при понижении расхода питательной воды.</div>
               <div class="bubble assistant">Источник: Инструкция по эксплуатации ПЭН, раздел 4.3 "Защиты и блокировки".</div>
             </div>
-            <div class="log-list">
+            <div class="log-list delayed-panel">
               <div class="log-item"><span class="dot safe"></span><span>Система даёт короткий ответ по существу, а не отправляет сотрудника искать по документам вручную</span><span>Эффект</span></div>
             </div>
           </div>
