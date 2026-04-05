@@ -1282,10 +1282,10 @@
       );
       slides.forEach(item =>
         item.querySelectorAll(".live-chat .bubble").forEach(node => {
-          if (!node.dataset.fulltext) {
-            node.dataset.fulltext = node.textContent.trim();
+          if (!node.dataset.fullhtml) {
+            node.dataset.fullhtml = node.innerHTML.trim();
           }
-          node.textContent = node.dataset.fulltext;
+          node.innerHTML = node.dataset.fullhtml;
           node.classList.remove("visible", "thinking");
         })
       );
@@ -1312,25 +1312,25 @@
       let offset = startDelay;
 
       bubbles.forEach((bubble) => {
-        const text = bubble.dataset.fulltext || bubble.textContent.trim();
+        const html = bubble.dataset.fullhtml || bubble.innerHTML.trim();
 
         if (bubble.classList.contains("assistant")) {
           const thinkingTimer = window.setTimeout(() => {
-            bubble.textContent = "";
+            bubble.innerHTML = "";
             bubble.classList.add("visible", "thinking");
           }, offset);
           typingTimers.push(thinkingTimer);
 
           const revealTimer = window.setTimeout(() => {
             bubble.classList.remove("thinking");
-            bubble.textContent = text;
+            bubble.innerHTML = html;
           }, offset + 1150);
           typingTimers.push(revealTimer);
 
           offset += 2200;
         } else {
           const timer = window.setTimeout(() => {
-            bubble.textContent = text;
+            bubble.innerHTML = html;
             bubble.classList.add("visible");
           }, offset);
           typingTimers.push(timer);
