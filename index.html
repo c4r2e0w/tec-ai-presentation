@@ -1081,32 +1081,67 @@
         <div class="split">
           <div class="copy-block">
             <div class="eyebrow reveal">Тренировки</div>
-            <h2 class="reveal delay-1">Противоаварийные и противопожарные тренировки, инструктажи и пятиминутки безопасности</h2>
+            <h2 class="reveal delay-1">Противоаварийные и противопожарные тренировки</h2>
             <ul class="reveal delay-2">
-              <li>ИИ собирает сценарии тренировок по реальным схемам станции, журналам нарушений и типовым аварийным ситуациям.</li>
+              <li>ИИ собирает сценарии тренировок на основе реальных происшествий и типовых аварийных ситуаций.</li>
               <li>Можно отрабатывать действия персонала по шагам: сигнал, первичные признаки, решения, переключения, доклад и разбор ошибок.</li>
-              <li>Для противопожарной подготовки ИИ формирует короткие инструктажи, пятиминутки безопасности и контрольные вопросы по зонам риска.</li>
               <li>После тренировки система делает разбор: что сделано верно, где потеряно время, какие действия нужно закрепить повторно.</li>
             </ul>
             <div class="kpi-strip reveal delay-3">
               <span class="pill">Сценарии по реальным кейсам</span>
               <span class="pill">Разбор ошибок по шагам</span>
-              <span class="pill">Пятиминутки безопасности</span>
               <span class="pill">Повторная отработка слабых мест</span>
             </div>
           </div>
           <div class="mockup reveal delay-2">
             <div class="toolbar"><span></span><span></span><span></span></div>
-            <div class="chat-lines">
-              <div class="bubble user">Подготовь противоаварийную тренировку: отказ основного питательного насоса на нагрузке.</div>
-              <div class="bubble assistant">Сценарий собран. Включены вводные, ожидаемые действия, контрольные точки и критерии оценки.</div>
-              <div class="bubble assistant">Противопожарный блок: действия при задымлении кабельного помещения, оповещение, изоляция зоны, первичные средства пожаротушения.</div>
-              <div class="bubble assistant">Пятиминутка безопасности: 5 вопросов по рискам, СИЗ, маршруту эвакуации и порядку доклада.</div>
-            </div>
+            <h3 style="margin: 4px 0 6px;">Пример тренировки</h3>
             <div class="mini-grid">
-              <div class="metric"><strong>2</strong><span>тренировочных сценария</span></div>
-              <div class="metric"><strong>5</strong><span>контрольных точек</span></div>
-              <div class="metric"><strong>1</strong><span>пятиминутка safety</span></div>
+              <div class="metric"><strong>Сценарий</strong><span>Отказ ПЭН на нагрузке</span></div>
+              <div class="metric"><strong>Формат</strong><span>Пошаговая отработка</span></div>
+              <div class="metric"><strong>Оценка</strong><span>Время и ошибки</span></div>
+            </div>
+            <div class="chat-lines live-chat">
+              <div class="bubble user">Подготовь противоаварийную тренировку: отказ основного питательного насоса на нагрузке.</div>
+              <div class="bubble assistant">Сценарий собран.<br><br>1. Сигнал: падение давления на нагнетании ПЭН.<br>2. Первичные признаки: снижение расхода питательной воды, изменение режима, сигналы по защите.<br>3. Действия: оценить состояние резервного ПЭН, выполнить переключение, проконтролировать устойчивость режима.<br>4. Доклад: доложить НСС и зафиксировать событие.<br>5. Разбор: оценить время реакции и правильность последовательности.</div>
+            </div>
+            <div class="log-list delayed-panel">
+              <div class="log-item"><span class="dot safe"></span><span>После тренировки система показывает, на каком шаге допущена ошибка и какие действия нужно закрепить повторно</span><span>Эффект</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="split">
+          <div class="copy-block">
+            <div class="eyebrow reveal">Инструктажи</div>
+            <h2 class="reveal delay-1">Инструктажи и пятиминутки безопасности</h2>
+            <ul class="reveal delay-2">
+              <li>ИИ быстро формирует короткие safety-блоки по конкретной зоне риска, оборудованию или виду работ.</li>
+              <li>Можно собирать пятиминутки перед сменой, ремонтом, огневыми работами и выходом в опасную зону.</li>
+              <li>Материал даётся в короткой, понятной форме: риск, что проверить, что запрещено, порядок доклада и действия при отклонении.</li>
+            </ul>
+            <div class="kpi-strip reveal delay-3">
+              <span class="pill">Короткий формат</span>
+              <span class="pill">Привязка к реальному риску</span>
+              <span class="pill">Быстрая подготовка</span>
+            </div>
+          </div>
+          <div class="mockup reveal delay-2">
+            <div class="toolbar"><span></span><span></span><span></span></div>
+            <h3 style="margin: 4px 0 6px;">Пример пятиминутки</h3>
+            <div class="mini-grid">
+              <div class="metric"><strong>Тема</strong><span>Огневые работы</span></div>
+              <div class="metric"><strong>Фокус</strong><span>Пожарный риск</span></div>
+              <div class="metric"><strong>Формат</strong><span>5 минут перед работой</span></div>
+            </div>
+            <div class="chat-lines live-chat">
+              <div class="bubble user">Подготовь пятиминутку безопасности перед огневыми работами в кабельной зоне.</div>
+              <div class="bubble assistant">Пятиминутка собрана.<br><br>1. Проверить допуск и состав бригады.<br>2. Убедиться в наличии огнетушителей и исправности связи.<br>3. Убрать горючие материалы из зоны работ.<br>4. Назначить ответственного за пожарное наблюдение.<br>5. При задымлении или возгорании немедленно прекратить работы, доложить и действовать по инструкции.</div>
+            </div>
+            <div class="log-list delayed-panel">
+              <div class="log-item"><span class="dot safe"></span><span>Инструктаж готовится за минуты и привязан не к абстрактной теме, а к реальной опасной работе</span><span>Эффект</span></div>
             </div>
           </div>
         </div>
@@ -1235,7 +1270,7 @@
     <div class="progress-wrap"><div class="progress" id="progress"></div></div>
     <div class="nav">
       <button class="btn" id="prev">← Назад</button>
-      <div class="counter" id="counter">1 / 10</div>
+      <div class="counter" id="counter">1 / 11</div>
       <button class="btn" id="next">Вперёд →</button>
     </div>
   </div>
