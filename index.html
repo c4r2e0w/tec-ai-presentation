@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ИИ на ТЭЦ</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+    :root {
+      --bg: #07111f;
+      --bg-2: #0e1b2d;
+      --panel: rgba(10, 21, 37, 0.72);
+      --panel-strong: rgba(12, 24, 42, 0.9);
+      --line: rgba(155, 192, 255, 0.16);
+      --text: #e8f0ff;
+      --muted: #9db0ca;
+      --cyan: #6de2ff;
+      --amber: #ffb44d;
+      --lime: #bbff77;
+      --red: #ff7a7a;
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      --radius: 28px;
+      --slide-padding: clamp(28px, 4vw, 54px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(255, 180, 77, 0.18), transparent 24%),
+        radial-gradient(circle at 85% 20%, rgba(109, 226, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 50% 80%, rgba(112, 89, 255, 0.1), transparent 30%),
+        linear-gradient(135deg, #05101b, #0b1728 50%, #07111f);
+      color: var(--text);
+      font-family: "IBM Plex Sans", sans-serif;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(50px);
+      opacity: 0.45;
+    }
+
+    body::before {
+      width: 420px;
+      height: 420px;
+      top: -120px;
+      right: -80px;
+      background: rgba(109, 226, 255, 0.18);
+      animation: drift 18s ease-in-out infinite;
+    }
+
+    body::after {
+      width: 520px;
+      height: 520px;
+      left: -140px;
+      bottom: -180px;
+      background: rgba(255, 180, 77, 0.16);
+      animation: drift 21s ease-in-out infinite reverse;
+    }
+
+    .grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 88%);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .deck {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .slides {
+      display: flex;
+      height: 100%;
+      transition: transform 900ms cubic-bezier(.2, .8, .12, 1);
+      will-change: transform;
+    }
+
+    .slide {
+      position: relative;
+      min-width: 100%;
+      height: 100%;
+      padding: var(--slide-padding);
+      display: grid;
+      place-items: stretch;
+      overflow: hidden;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 24px;
+      border-radius: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      z-index: 0;
+    }
+
+    .slide > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+
+    h1 {
+      font-size: clamp(56px, 8vw, 112px);
+      max-width: 10ch;
+    }
+
+    h2 {
+      font-size: clamp(36px, 5vw, 64px);
+      max-width: 13ch;
+    }
+
+    h3 {
+      font-size: clamp(20px, 2vw, 28px);
+      line-height: 1.08;
+    }
+
+    p,
+    li {
+      font-size: clamp(16px, 1.35vw, 24px);
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .title-slide {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 28px;
+      padding: clamp(20px, 4vw, 44px);
+    }
+
+    .hero-copy p {
+      max-width: 32ch;
+      font-size: clamp(20px, 1.7vw, 28px);
+    }
+
+    .hero-stat {
+      display: grid;
+      grid-template-rows: 1fr auto auto;
+      padding: clamp(24px, 4vw, 40px);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 180, 77, 0.1), transparent 55%),
+        linear-gradient(135deg, rgba(13, 29, 51, 0.92), rgba(5, 16, 27, 0.72));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .station-ring {
+      position: relative;
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+    }
+
+    .station-ring::before,
+    .station-ring::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(109, 226, 255, 0.18);
+      animation: pulse 6s linear infinite;
+    }
+
+    .station-ring::before {
+      width: 280px;
+      height: 280px;
+    }
+
+    .station-ring::after {
+      width: 420px;
+      height: 420px;
+      animation-duration: 9s;
+    }
+
+    .core {
+      width: 180px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 34px;
+      color: white;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.28), transparent 40%),
+        linear-gradient(135deg, rgba(255, 180, 77, 0.88), rgba(109, 226, 255, 0.68));
+      box-shadow: 0 0 50px rgba(109, 226, 255, 0.2);
+    }
+
+    .orbit {
+      position: absolute;
+      padding: 14px 18px;
+      border-radius: 18px;
+      background: rgba(7, 18, 32, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      min-width: 140px;
+      text-align: center;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+    }
+
+    .orbit.one { top: 8%; left: 50%; transform: translateX(-50%); }
+    .orbit.two { right: 4%; top: 40%; }
+    .orbit.three { bottom: 12%; left: 50%; transform: translateX(-50%); }
+    .orbit.four { left: 4%; top: 40%; }
+
+    .muted-tag {
+      display: inline-block;
+      margin-top: 18px;
+      color: var(--cyan);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      align-content: start;
+    }
+
+    .card {
+      position: relative;
+      padding: 26px 26px 24px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(15, 28, 49, 0.86), rgba(7, 16, 29, 0.74));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.08), transparent 70%);
+      transform: translateX(-120%);
+      animation: sheen 7.5s ease-in-out infinite;
+    }
+
+    .card .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 16px;
+      font-size: 24px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .card p {
+      margin: 12px 0 0;
+      max-width: 26ch;
+    }
+
+    .impact {
+      margin-top: 18px;
+      color: var(--amber);
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 26px;
+      align-items: stretch;
+      height: 100%;
+    }
+
+    .copy-block {
+      padding: clamp(18px, 3vw, 34px);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      justify-content: center;
+    }
+
+    .copy-block ul {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    .copy-block li + li {
+      margin-top: 10px;
+    }
+
+    .mockup {
+      position: relative;
+      padding: 18px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(13, 27, 47, 0.94), rgba(5, 13, 25, 0.8));
+      overflow: hidden;
+      display: grid;
+      gap: 16px;
+    }
+
+    .mockup::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(109, 226, 255, 0.08), transparent 30%),
+        linear-gradient(180deg, rgba(255, 180, 77, 0.05), transparent 40%);
+      pointer-events: none;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .toolbar span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .toolbar span:nth-child(1) { background: #ff6b6b; }
+    .toolbar span:nth-child(2) { background: #ffd166; }
+    .toolbar span:nth-child(3) { background: #06d6a0; }
+
+    .chat-lines,
+    .log-list,
+    .chart-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .bubble,
+    .log-item,
+    .metric,
+    .bar {
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .bubble {
+      padding: 14px 16px;
+      max-width: 84%;
+    }
+
+    .bubble.user {
+      margin-left: auto;
+      background: rgba(109, 226, 255, 0.1);
+    }
+
+    .bubble.assistant {
+      background: rgba(255, 180, 77, 0.08);
+    }
+
+    .live-chat .bubble {
+      opacity: 0;
+      transform: translateY(12px) scale(0.96);
+      filter: blur(6px);
+      transition:
+        opacity 320ms ease,
+        transform 320ms cubic-bezier(.2, .8, .2, 1),
+        filter 320ms ease;
+    }
+
+    .live-chat .bubble.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    .live-chat .bubble.thinking {
+      min-width: 64px;
+      min-height: 46px;
+    }
+
+    .live-chat .bubble.thinking::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow:
+        14px 0 0 rgba(255, 255, 255, 0.5),
+        28px 0 0 rgba(255, 255, 255, 0.3);
+      animation: dots 1s infinite ease-in-out;
+      transform: translateY(2px);
+    }
+
+    .delayed-panel {
+      opacity: 0;
+      transform: translateY(16px);
+      filter: blur(8px);
+      transition:
+        opacity 420ms ease,
+        transform 420ms cubic-bezier(.2, .8, .2, 1),
+        filter 420ms ease;
+    }
+
+    .delayed-panel.visible {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    .log-item {
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 18px rgba(255, 180, 77, 0.45);
+    }
+
+    .dot.safe { background: var(--lime); box-shadow: 0 0 18px rgba(187, 255, 119, 0.4); }
+    .dot.warn { background: var(--red); box-shadow: 0 0 18px rgba(255, 122, 122, 0.4); }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      padding: 16px;
+    }
+
+    .metric strong {
+      display: block;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 28px;
+      color: var(--text);
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .chart {
+      position: relative;
+      height: 240px;
+      padding: 18px;
+      border-radius: 22px;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        rgba(255, 255, 255, 0.02);
+      background-size: 100% 20%, 12.5% 100%, auto;
+    }
+
+    .line {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      height: 150px;
+    }
+
+    .line svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .line path {
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 8px rgba(109, 226, 255, 0.35));
+      stroke-dasharray: 500;
+      stroke-dashoffset: 500;
+      animation: draw 2.8s ease forwards 0.4s;
+    }
+
+    .line path.secondary {
+      stroke: var(--amber);
+      filter: drop-shadow(0 0 8px rgba(255, 180, 77, 0.35));
+      animation-delay: 0.9s;
+    }
+
+    .roadmap {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      align-items: stretch;
+      margin-top: 24px;
+    }
+
+    .step {
+      position: relative;
+      padding: 22px 20px 24px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(15, 28, 49, 0.88), rgba(7, 16, 29, 0.75));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .step::before {
+      content: attr(data-step);
+      display: inline-grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      margin-bottom: 18px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 20px;
+      background: rgba(109, 226, 255, 0.12);
+      color: var(--cyan);
+      border: 1px solid rgba(109, 226, 255, 0.25);
+    }
+
+    .step::after {
+      content: "";
+      position: absolute;
+      top: 42px;
+      left: calc(100% - 8px);
+      width: 24px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(109, 226, 255, 0.4), transparent);
+    }
+
+    .step:last-child::after {
+      display: none;
+    }
+
+    .step p {
+      margin-top: 10px;
+    }
+
+    .big-quote {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: clamp(24px, 5vw, 64px);
+    }
+
+    .big-quote h2 {
+      max-width: 12ch;
+    }
+
+    .big-quote p {
+      max-width: 40ch;
+      margin: 22px auto 0;
+      font-size: clamp(20px, 1.65vw, 28px);
+    }
+
+    .controls {
+      position: fixed;
+      left: 24px;
+      right: 24px;
+      bottom: 18px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      pointer-events: none;
+    }
+
+    .progress-wrap {
+      flex: 1;
+      max-width: 420px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      pointer-events: auto;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--amber), var(--cyan));
+      transition: width 500ms ease;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .btn {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(8, 18, 32, 0.74);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: rgba(14, 28, 48, 0.9);
+      border-color: rgba(109, 226, 255, 0.24);
+    }
+
+    .counter {
+      min-width: 82px;
+      text-align: center;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(26px) scale(0.985);
+      filter: blur(8px);
+      transition:
+        opacity 720ms cubic-bezier(.18, .8, .22, 1),
+        transform 720ms cubic-bezier(.18, .8, .22, 1),
+        filter 720ms cubic-bezier(.18, .8, .22, 1);
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    .kpi-strip {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .pill {
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(18px, -22px, 0) scale(1.08); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      70% { transform: scale(1.05); opacity: 0.18; }
+      100% { transform: scale(1.12); opacity: 0; }
+    }
+
+    @keyframes draw {
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes sheen {
+      0%, 100% { transform: translateX(-120%); }
+      55% { transform: translateX(120%); }
+    }
+
+    @keyframes dots {
+      0% {
+        opacity: 0.55;
+        transform: translateY(2px) scale(0.9);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(2px) scale(1);
+      }
+      100% {
+        opacity: 0.55;
+        transform: translateY(2px) scale(0.9);
+      }
+    }
+
+    @media (max-width: 1120px) {
+      .title-slide,
+      .split,
+      .roadmap,
+      .panel-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .slide {
+        overflow-y: auto;
+      }
+
+      .station-ring {
+        min-height: 280px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="deck">
+    <div class="slides" id="slides">
+      <section class="slide active">
+        <div class="title-slide">
+          <div class="hero-copy">
+            <div class="eyebrow reveal">Презентация для руководства</div>
+            <h1 class="reveal delay-1">ИИ на ТЭЦ</h1>
+            <p class="reveal delay-2">
+              Не автопилот и не модный термин, а новый рабочий инструмент для персонала,
+              инженеров и руководителей.
+            </p>
+            <div class="kpi-strip reveal delay-3">
+              <span class="pill">Обучение и приёмка знаний</span>
+              <span class="pill">Противоаварийная тренировка</span>
+              <span class="pill">Поиск по опыту станции</span>
+              <span class="pill">Инженерные мини-решения</span>
+              <span class="pill">SCADA-аналитика и рекомендации</span>
+            </div>
+          </div>
+          <div class="hero-stat reveal delay-2">
+            <div class="station-ring">
+              <div class="core">AI<br />Tool</div>
+              <div class="orbit one">Преподаватель</div>
+              <div class="orbit two">Аналитик</div>
+              <div class="orbit three">Инженер</div>
+              <div class="orbit four">Ассистент</div>
+            </div>
+            <h3>Один инструмент, много прикладных ролей</h3>
+            <p>
+              От помощи в ежедневной работе до запуска новых практических решений внутри станции.
+            </p>
+            <span class="muted-tag">От личной эффективности к технологическому советчику</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="copy-block">
+          <div class="eyebrow reveal">4 прикладных сценария</div>
+          <h2 class="reveal delay-1">Где это приносит реальную пользу</h2>
+          <div class="panel-grid">
+            <article class="card reveal delay-1">
+              <div class="icon">🎓</div>
+              <h3>Обучение и приёмка знаний</h3>
+              <p>Курс, экзаменатор, генератор тестов и сценариев противоаварийной тренировки по материалам станции.</p>
+              <div class="impact">Быстрее ввод персонала и единый стандарт проверки знаний</div>
+            </article>
+            <article class="card reveal delay-2">
+              <div class="icon">🔎</div>
+              <h3>AI-поиск по памяти станции</h3>
+              <p>Поиск ответов сразу по регламентам, дефектам, журналам, схемам и прошлым переключениям.</p>
+              <div class="impact">Меньше потерь времени и меньше ошибок из-за разрозненных данных</div>
+            </article>
+            <article class="card reveal delay-3">
+              <div class="icon">🛠️</div>
+              <h3>Инструмент инженера</h3>
+              <p>Быстрое создание небольших рабочих сервисов, скриптов, интерфейсов и видеоаналитики.</p>
+              <div class="impact">Рост количества полезных инициатив без долгой разработки</div>
+            </article>
+            <article class="card reveal delay-4">
+              <div class="icon">📈</div>
+              <h3>SCADA-аналитика и рекомендации</h3>
+              <p>Автоматические графики, выводы, презентации и подсказки по отклонению режима от оптимума.</p>
+              <div class="impact">Освобождение людей от рутины и более быстрые управленческие выводы</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="split">
+          <div class="copy-block">
+            <div class="eyebrow reveal">Пример 1</div>
+            <h2 class="reveal delay-1">Обучение и проверка знаний</h2>
+            <h3 class="reveal delay-2">Текущая ситуация</h3>
+            <ul class="reveal delay-2">
+              <li>Обучение персонала основано на самостоятельном изучении бумажных инструкций и схем.</li>
+              <li>Информация разрознена, перегружена и трудно воспринимается.</li>
+              <li>Процесс обучения неструктурирован и практически не отслеживается.</li>
+            </ul>
+            <h3 class="reveal delay-3">Проблема</h3>
+            <ul class="reveal delay-3">
+              <li>Избыточный объём информации.</li>
+              <li>Сложность быстрого поиска нужных данных.</li>
+              <li>Низкая вовлечённость сотрудников.</li>
+              <li>Критическая зависимость от наставника.</li>
+            </ul>
+          </div>
+          <div class="mockup reveal delay-2">
+            <div class="toolbar"><span></span><span></span><span></span></div>
+            <h3 style="margin: 4px 0 6px;">Пример реальной ситуации сегодня</h3>
+            <div class="chat-lines live-chat">
+              <div class="bubble user">Я не понял, в какой последовательности действовать при падении давления на питательном насосе. Где это точно описано?</div>
+              <div class="bubble assistant">Посмотри инструкцию по насосу, оперативную схему. Там должно быть.</div>
+              <div class="bubble user">Наставник на обходе. Проверка знаний завтра. Что мне учить в первую очередь?</div>
+              <div class="bubble assistant">Начни с основ. Потом разберётесь по ситуации.</div>
+            </div>
+            <div class="chart-panel delayed-panel">
+              <div class="log-item"><span class="dot warn"></span><span>Проблема не в отсутствии документов, а в том, что сотрудник не получает быстрый, точный и контекстный ответ. В результате обучение сводится к чтению, догадкам и устным пояснениям вместо понятной системы подготовки.</span><span>Вывод</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="split">
+          <div class="copy-block">
+            <div class="eyebrow reveal">Пример 2</div>
+            <h2 class="reveal delay-1">Обучение и проверка знаний. Роль ИИ и решение</h2>
+            <h3 class="reveal delay-2">Роль ИИ</h3>
+            <ul class="reveal delay-2">
+              <li>Преобразует сложные инструкции в простой и понятный формат.</li>
+              <li>Отвечает на вопросы как живой наставник 24/7.</li>
+              <li>Анализирует ответы и выявляет пробелы в знаниях.</li>
+              <li>Подбирает персональные задания и сценарии обучения.</li>
+              <li>Формирует отчёты по уровню подготовки персонала.</li>
+            </ul>
+            <h3 class="reveal delay-3">Решение</h3>
+            <ul class="reveal delay-3">
+              <li>Внедрение цифровой обучающей системы со структурой по модулям.</li>
+              <li>Каждая инструкция преобразована в понятный учебный материал.</li>
+              <li>Обучение проходит в интерактивном формате.</li>
+              <li>Обеспечен контроль и прозрачность прогресса.</li>
+            </ul>
+            <div class="kpi-strip reveal delay-4">
+              <span class="pill">Понятные учебные модули</span>
+              <span class="pill">Интерактивный формат</span>
+              <span class="pill">Персональные задания</span>
+              <span class="pill">Отчёты по знаниям</span>
+            </div>
+          </div>
+          <div class="mockup reveal delay-2">
+            <div class="toolbar"><span></span><span></span><span></span></div>
+            <div class="chat-lines">
+              <div class="bubble user">Собери цифровой учебный модуль по теме "Питательный насос".</div>
+              <div class="bubble assistant">Учебный модуль сформирован. Сложная инструкция преобразована в понятный учебный сценарий.</div>
+              <div class="bubble assistant">Добавлены теория, вопросы, персональные задания, контроль знаний и итоговый отчёт для руководителя.</div>
+              <div class="bubble assistant">Ассистент отвечает на вопросы сотрудника, анализирует ошибки и даёт материал на повторение.</div>
+              <div class="bubble assistant">Результат: обучение структурировано, интерактивно и полностью прозрачно по прогрессу.</div>
+            </div>
+            <div class="mini-grid">
+              <div class="metric"><strong>5</strong><span>учебных модулей</span></div>
+              <div class="metric"><strong>12</strong><span>персональных заданий</span></div>
+              <div class="metric"><strong>1</strong><span>отчёт по знаниям</span></div>
+            </div>
+            <div class="log-list">
+              <div class="log-item"><span class="dot"></span><span>ИИ упрощает инструкции и объясняет материал простым языком</span><span>24/7</span></div>
+              <div class="log-item"><span class="dot safe"></span><span>Анализирует ответы и показывает слабые места сотрудника</span><span>AI</span></div>
+              <div class="log-item"><span class="dot"></span><span>Формирует отчёты по уровню подготовки персонала</span><span>HR/Рук.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="split">
+          <div class="copy-block">
+            <div class="eyebrow reveal">Пример 3</div>
+            <h2 class="reveal delay-1">Противоаварийные и противопожарные тренировки, инструктажи и пятиминутки безопасности</h2>
+            <ul class="reveal delay-2">
+              <li>ИИ собирает сценарии тренировок по реальным схемам станции, журналам нарушений и типовым аварийным ситуациям.</li>
+              <li>Можно отрабатывать действия персонала по шагам: сигнал, первичные признаки, решения, переключения, доклад и разбор ошибок.</li>
+              <li>Для противопожарной подготовки ИИ формирует короткие инструктажи, пятиминутки безопасности и контрольные вопросы по зонам риска.</li>
+              <li>После тренировки система делает разбор: что сделано верно, где потеряно время, какие действия нужно закрепить повторно.</li>
+            </ul>
+            <div class="kpi-strip reveal delay-3">
+              <span class="pill">Сценарии по реальным кейсам</span>
+              <span class="pill">Разбор ошибок по шагам</span>
+              <span class="pill">Пятиминутки безопасности</span>
+              <span class="pill">Повторная отработка слабых мест</span>
+            </div>
+          </div>
+          <div class="mockup reveal delay-2">
+            <div class="toolbar"><span></span><span></span><span></span></div>
+            <div class="chat-lines">
+              <div class="bubble user">Подготовь противоаварийную тренировку: отказ основного питательного насоса на нагрузке.</div>
+              <div class="bubble assistant">Сценарий собран. Включены вводные, ожидаемые действия, контрольные точки и критерии оценки.</div>
+              <div class="bubble assistant">Противопожарный блок: действия при задымлении кабельного помещения, оповещение, изоляция зоны, первичные средства пожаротушения.</div>
+              <div class="bubble assistant">Пятиминутка безопасности: 5 вопросов по рискам, СИЗ, маршруту эвакуации и порядку доклада.</div>
+            </div>
+            <div class="mini-grid">
+              <div class="metric"><strong>2</strong><span>тренировочных сценария</span></div>
+              <div class="metric"><strong>5</strong><span>контрольных точек</span></div>
+              <div class="metric"><strong>1</strong><span>пятиминутка safety</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="split">
+          <div class="mockup reveal delay-1">
+            <div class="toolbar"><span></span><span></span><span></span></div>
+            <div class="chat-lines">
+              <div class="bubble user">Какие были дефекты по ТДМ-7 за последний год и что делали при похожем перегреве?</div>
+              <div class="bubble assistant">Найдено 6 релевантных случаев. Чаще всего причина: загрязнение, отклонение охлаждения, несоответствие режима.</div>
+              <div class="bubble assistant">Источники: журнал дефектов, отчет по ремонту от 14.02, запись переключения от 22.11, инструкция раздел 5.4.</div>
+            </div>
+            <div class="log-list">
+              <div class="log-item"><span class="dot"></span><span>14.02 | Дефект: локальный перегрев подшипника</span><span>Отчёт</span></div>
+              <div class="log-item"><span class="dot safe"></span><span>22.11 | Переключение по резервной схеме охлаждения</span><span>Журнал</span></div>
+              <div class="log-item"><span class="dot warn"></span><span>05.12 | Отклонение температуры выше порога</span><span>Авар. запись</span></div>
+            </div>
+          </div>
+          <div class="copy-block">
+            <div class="eyebrow reveal">Пример 4</div>
+            <h2 class="reveal delay-1">AI-ассистент для поиска нужной информации</h2>
+            <ul class="reveal delay-2">
+              <li>Сотрудник задает вопрос обычным языком, без поиска по папкам и архивам.</li>
+              <li>Ассистент ищет сразу по инструкциям, схемам, дефектам, журналам, отчетам и истории переключений.</li>
+              <li>Ответ сопровождается ссылками на источник, а не просто “модель так считает”.</li>
+              <li>По сути появляется единая память станции, доступная в моменте.</li>
+            </ul>
+            <div class="kpi-strip reveal delay-3">
+              <span class="pill">Меньше времени на поиск</span>
+              <span class="pill">Ниже риск работать по устной памяти</span>
+              <span class="pill">Выше скорость решений</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="split">
+          <div class="copy-block">
+            <div class="eyebrow reveal">Примеры 5 и 6</div>
+            <h2 class="reveal delay-1">Инженерные мини-решения и развернутая аналитика данных</h2>
+            <ul class="reveal delay-2">
+              <li>Инженер сам запускает прототип: видеоаналитика по каскам, сервис фиксации переключений, журнал дефектов с комментариями.</li>
+              <li>В аналитике ИИ автоматически забирает данные из SCADA, historian и сменных журналов, строит таблицы, графики и презентационные выводы.</li>
+              <li>Примеры: сравнение режимов за смену и сутки, сопоставление температуры, расхода, нагрузки и давления, поиск параметров, сильнее всего влияющих на отклонение.</li>
+              <li>Следующий уровень: автоматический вывод, почему ухудшился режим, какие узлы вероятнее всего вовлечены, и какие действия стоит проверить в первую очередь.</li>
+            </ul>
+            <div class="kpi-strip reveal delay-3">
+              <span class="pill">Быстрый прототип вместо месяцев ожидания</span>
+              <span class="pill">Авторасчеты и автографики</span>
+              <span class="pill">Меньше ручной подготовки отчетов</span>
+              <span class="pill">Подсказки по режиму для сменного персонала</span>
+            </div>
+          </div>
+          <div class="mockup reveal delay-2">
+            <div class="toolbar"><span></span><span></span><span></span></div>
+            <div class="mini-grid">
+              <div class="metric"><strong>98.4%</strong><span>обнаружение каски</span></div>
+              <div class="metric"><strong>17</strong><span>переключений за смену</span></div>
+              <div class="metric"><strong>24</strong><span>параметра в анализе</span></div>
+            </div>
+            <div class="chart">
+              <div class="line">
+                <svg viewBox="0 0 500 160" preserveAspectRatio="none">
+                  <path stroke="#6de2ff" d="M0,120 C40,115 70,60 110,72 C150,84 180,130 220,122 C260,114 290,48 330,52 C370,56 410,100 450,86 C470,78 485,40 500,46"></path>
+                  <path class="secondary" d="M0,105 C35,92 78,100 112,88 C146,76 176,58 215,66 C254,74 295,120 332,118 C370,116 405,70 450,62 C474,58 487,56 500,52"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="log-list">
+              <div class="log-item"><span class="dot warn"></span><span>Отклонение режима: рост температуры при снижении расхода и неизменной нагрузке</span><span>08:32</span></div>
+              <div class="log-item"><span class="dot"></span><span>Автовывод: ключевая связка "расход охлаждения ↓ / температура ↑ / вибрация +6%"</span><span>AI</span></div>
+              <div class="log-item"><span class="dot safe"></span><span>Рекомендация: проверить контур охлаждения, положение арматуры и допустимо скорректировать нагрузку на 3-5%</span><span>AI</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="copy-block">
+          <div class="eyebrow reveal">Дорожка внедрения</div>
+          <h2 class="reveal delay-1">От простого к сложному</h2>
+          <div class="roadmap">
+            <article class="step reveal delay-1" data-step="1">
+              <h3>Личный помощник</h3>
+              <p>Поиск по документам, ответы на вопросы, служебные записки, быстрые сводки и отчеты.</p>
+            </article>
+            <article class="step reveal delay-2" data-step="2">
+              <h3>Помощник подразделения</h3>
+              <p>Обучение, приёмка знаний, противоаварийные тренировки, разбор дефектов, анализ переключений и локальные расчеты.</p>
+            </article>
+            <article class="step reveal delay-3" data-step="3">
+              <h3>Инженерный инструмент</h3>
+              <p>Прототипы, скрипты, видеоаналитика, внутренние сервисы и быстрые прикладные идеи.</p>
+            </article>
+            <article class="step reveal delay-4" data-step="4">
+              <h3>Технологический советчик</h3>
+              <p>SCADA-аналитика, причины отклонений, рекомендации по более близкому к идеалу режиму.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="big-quote">
+          <div class="eyebrow reveal">Управленческий вывод</div>
+          <h2 class="reveal delay-1">Задача не в одном “AI-проекте”</h2>
+          <p class="reveal delay-2">
+            Задача в том, чтобы создать на ТЭЦ среду, где персонал, инженеры и руководители
+            ежедневно применяют ИИ в десятках полезных сценариев:
+            от личного помощника и экзаменатора до инженерной мастерской и советчика по режиму.
+          </p>
+          <div class="kpi-strip reveal delay-3">
+            <span class="pill">Дать инструмент</span>
+            <span class="pill">Показать быстрые кейсы</span>
+            <span class="pill">Тиражировать лучшие решения</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+    <div class="nav">
+      <button class="btn" id="prev">← Назад</button>
+      <div class="counter" id="counter">1 / 10</div>
+      <button class="btn" id="next">Вперёд →</button>
+    </div>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const track = document.getElementById("slides");
+    const progress = document.getElementById("progress");
+    const counter = document.getElementById("counter");
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    const revealTimers = [];
+    const typingTimers = [];
+    const revealDelayMap = {
+      "delay-1": 180,
+      "delay-2": 340,
+      "delay-3": 520,
+      "delay-4": 700
+    };
+    let index = 0;
+
+    function clearRevealTimers() {
+      while (revealTimers.length) {
+        clearTimeout(revealTimers.pop());
+      }
+    }
+
+    function clearTypingTimers() {
+      while (typingTimers.length) {
+        clearTimeout(typingTimers.pop());
+      }
+    }
+
+    function getRevealDelay(element) {
+      const className = Array.from(element.classList).find(name => revealDelayMap[name]);
+      return className ? revealDelayMap[className] : 60;
+    }
+
+    function runRevealSequence(slide) {
+      clearRevealTimers();
+      clearTypingTimers();
+      slides.forEach(item =>
+        item.querySelectorAll(".reveal").forEach(node => node.classList.remove("in"))
+      );
+      slides.forEach(item =>
+        item.querySelectorAll(".live-chat .bubble").forEach(node => {
+          if (!node.dataset.fulltext) {
+            node.dataset.fulltext = node.textContent.trim();
+          }
+          node.textContent = node.dataset.fulltext;
+          node.classList.remove("visible", "thinking");
+        })
+      );
+      slides.forEach(item =>
+        item.querySelectorAll(".delayed-panel").forEach(node => node.classList.remove("visible"))
+      );
+
+      const elements = Array.from(slide.querySelectorAll(".reveal"));
+      elements.forEach((element) => {
+        const timer = window.setTimeout(() => {
+          element.classList.add("in");
+        }, 880 + getRevealDelay(element));
+        revealTimers.push(timer);
+      });
+
+      const liveChat = slide.querySelector(".live-chat");
+      if (liveChat) {
+        startLiveChat(liveChat, 1400);
+      }
+    }
+
+    function startLiveChat(container, startDelay) {
+      const bubbles = Array.from(container.querySelectorAll(".bubble"));
+      let offset = startDelay;
+
+      bubbles.forEach((bubble) => {
+        const text = bubble.dataset.fulltext || bubble.textContent.trim();
+
+        if (bubble.classList.contains("assistant")) {
+          const thinkingTimer = window.setTimeout(() => {
+            bubble.textContent = "";
+            bubble.classList.add("visible", "thinking");
+          }, offset);
+          typingTimers.push(thinkingTimer);
+
+          const revealTimer = window.setTimeout(() => {
+            bubble.classList.remove("thinking");
+            bubble.textContent = text;
+          }, offset + 1150);
+          typingTimers.push(revealTimer);
+
+          offset += 2200;
+        } else {
+          const timer = window.setTimeout(() => {
+            bubble.textContent = text;
+            bubble.classList.add("visible");
+          }, offset);
+          typingTimers.push(timer);
+          offset += 1450;
+        }
+      });
+
+      const delayedPanels = Array.from(container.parentElement.querySelectorAll(".delayed-panel"));
+      delayedPanels.forEach((panel, panelIndex) => {
+        const timer = window.setTimeout(() => {
+          panel.classList.add("visible");
+        }, offset + 520 + panelIndex * 260);
+        typingTimers.push(timer);
+      });
+    }
+
+    function updateSlides(nextIndex) {
+      index = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      track.style.transform = `translateX(-${index * 100}%)`;
+      slides.forEach((slide, i) => {
+        slide.classList.toggle("active", i === index);
+      });
+      progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+      counter.textContent = `${index + 1} / ${slides.length}`;
+      prev.disabled = index === 0;
+      next.disabled = index === slides.length - 1;
+      prev.style.opacity = index === 0 ? 0.45 : 1;
+      next.style.opacity = index === slides.length - 1 ? 0.45 : 1;
+      runRevealSequence(slides[index]);
+    }
+
+    prev.addEventListener("click", () => updateSlides(index - 1));
+    next.addEventListener("click", () => updateSlides(index + 1));
+
+    window.addEventListener("keydown", (event) => {
+      if (["ArrowRight", "PageDown", " "].includes(event.key)) {
+        event.preventDefault();
+        updateSlides(index + 1);
+      }
+      if (["ArrowLeft", "PageUp"].includes(event.key)) {
+        event.preventDefault();
+        updateSlides(index - 1);
+      }
+      if (event.key === "Home") updateSlides(0);
+      if (event.key === "End") updateSlides(slides.length - 1);
+    });
+
+    let touchStartX = 0;
+    window.addEventListener("touchstart", (event) => {
+      touchStartX = event.changedTouches[0].clientX;
+    }, { passive: true });
+    window.addEventListener("touchend", (event) => {
+      const dx = event.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 50) updateSlides(index + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+
+    updateSlides(0);
+  </script>
+</body>
+</html>
