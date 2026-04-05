@@ -1366,40 +1366,47 @@
         checked: false,
         questions: [
           {
-            question: "Вопрос от ИИ: какая из перечисленных защит относится к ПЭН?",
+            type: "multi",
+            question: "Вопрос от ИИ: выберите условия, запрещающие пуск турбины.",
             options: [
-              "Падение давления масла на смазку до 0,3 кгс/см²",
-              "Рост температуры уходящих газов на 20°C",
-              "Снижение уровня в деаэраторе без отключения ПЭН",
-              "Отклонение частоты сети на 0,2 Гц"
+              "Отклонения показателей теплового и механического состояний турбины от допустимых значений",
+              "Неисправность хотя бы одной из защит, действующих на останов турбины",
+              "Наличие дефектов системы регулирования и парораспределения, которые могут привести к разгону турбины",
+              "Неисправность одного из масляных насосов смазки, регулирования, уплотнений генератора или устройств их АВР",
+              "Отклонение качества масла от норм или понижение температуры масла ниже установленного предела",
+              "Отклонение качества свежего пара по химическому составу от норм",
+              "Отсутствие записи в сменном журнале о текущей нагрузке блока",
+              "Несогласованность времени на настенных часах в помещении щита управления"
+            ],
+            correct: [0, 1, 2, 3, 4, 5],
+            success: "Верно. Выбраны ключевые условия, при которых пуск турбины запрещён.",
+            error: "Неверно. К запрещающим условиям относятся пункты, связанные с состоянием турбины, защитами, системой регулирования, маслосистемой и качеством свежего пара."
+          },
+          {
+            type: "single",
+            question: "Какое из перечисленных состояний само по себе запрещает пуск турбины?",
+            options: [
+              "Отклонение качества свежего пара по химическому составу от норм",
+              "Небольшое отклонение освещённости на ЦЩУ",
+              "Отсутствие подписи в журнале обхода за прошлую смену",
+              "Неактуальный ярлык на резервном шкафу"
             ],
             correct: 0,
-            success: "Верно. Это одна из защит ПЭН.",
-            error: "Неверно. Правильный ответ: падение давления масла на смазку до 0,3 кгс/см²."
+            success: "Верно. Отклонение качества свежего пара от норм запрещает пуск турбины.",
+            error: "Неверно. Правильный ответ: отклонение качества свежего пара по химическому составу от норм."
           },
           {
-            question: "Какое действие ИИ должен рекомендовать после неверного ответа сотрудника?",
+            type: "single",
+            question: "Какой дефект системы напрямую делает пуск турбины недопустимым из-за риска разгона?",
             options: [
-              "Перейти к следующей теме без пояснений",
-              "Сразу завершить обучение",
-              "Направить на повторение нужного раздела инструкции",
-              "Удалить вопрос из теста"
+              "Неисправность системы регулирования и парораспределения",
+              "Небольшое отклонение температуры в помещении турбинного отделения",
+              "Отсутствие одной архивной диаграммы в historian",
+              "Снижение яркости экрана оператора"
             ],
-            correct: 2,
-            success: "Верно. Система должна направлять сотрудника на повторение нужного раздела.",
-            error: "Неверно. Правильный ответ: направить на повторение нужного раздела инструкции."
-          },
-          {
-            question: "Что важно для руководителя в такой системе проверки знаний?",
-            options: [
-              "Только факт прохождения теста",
-              "Прозрачность прогресса и выявление пробелов",
-              "Число открытых окон у сотрудника",
-              "Количество страниц в инструкции"
-            ],
-            correct: 1,
-            success: "Верно. Руководителю важны прогресс и реальные слабые места.",
-            error: "Неверно. Правильный ответ: прозрачность прогресса и выявление пробелов."
+            correct: 0,
+            success: "Верно. Такой дефект может привести к разгону турбины, поэтому пуск запрещён.",
+            error: "Неверно. Правильный ответ: неисправность системы регулирования и парораспределения."
           }
         ]
       }
@@ -1439,7 +1446,8 @@
       question.options.forEach((option, index) => {
         const label = document.createElement("label");
         label.className = "quiz-option";
-        label.innerHTML = `<input type="radio" name="${quizId}" value="${index}" /><span>${option}</span>`;
+        const inputType = question.type === "multi" ? "checkbox" : "radio";
+        label.innerHTML = `<input type="${inputType}" name="${quizId}" value="${index}" /><span>${option}</span>`;
         optionsWrap.appendChild(label);
       });
 
@@ -1561,13 +1569,13 @@
       button.addEventListener("click", () => {
         const quizId = button.dataset.checkQuiz;
         const quiz = quizData[quizId];
-        const selected = document.querySelector(`input[name="${quizId}"]:checked`);
+        const selected = Array.from(document.querySelectorAll(`input[name="${quizId}"]:checked`));
         const result = document.querySelector(`[data-quiz-result="${quizId}"]`);
         const currentQuestion = quiz.questions[quiz.current];
 
         if (quiz.checked) return;
 
-        if (!selected) {
+        if (selected.length === 0) {
           result.textContent = "Сначала выберите вариант ответа.";
           result.classList.remove("success");
           result.classList.add("error");
@@ -1575,7 +1583,11 @@
         }
 
         quiz.checked = true;
-        if (Number(selected.value) === currentQuestion.correct) {
+        const selectedValues = selected.map((item) => Number(item.value)).sort((a, b) => a - b);
+        const correctValues = Array.isArray(currentQuestion.correct) ? [...currentQuestion.correct].sort((a, b) => a - b) : [currentQuestion.correct];
+        const isCorrect = selectedValues.length === correctValues.length && selectedValues.every((value, idx) => value === correctValues[idx]);
+
+        if (isCorrect) {
           quiz.score += 1;
           document.querySelector(`[data-quiz-score="${quizId}"]`).textContent = `Счёт: ${quiz.score}`;
           result.textContent = currentQuestion.success;
