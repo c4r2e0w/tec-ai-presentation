@@ -597,6 +597,40 @@
       animation-delay: 0.9s;
     }
 
+    .demo-shot {
+      position: relative;
+      overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .demo-shot img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .demo-caption {
+      display: grid;
+      gap: 10px;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .demo-caption h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .demo-caption p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
     .roadmap {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1291,23 +1325,17 @@
           </div>
           <div class="mockup reveal delay-2">
             <div class="toolbar"><span></span><span></span><span></span></div>
-            <div class="mini-grid">
-              <div class="metric"><strong>98.4%</strong><span>обнаружение каски</span></div>
-              <div class="metric"><strong>17</strong><span>переключений за смену</span></div>
-              <div class="metric"><strong>24</strong><span>параметра в анализе</span></div>
+            <div class="demo-caption">
+              <h3>Пример быстрой реализации идеи</h3>
+              <p>Мини-приложение для определения наличия каски у работника по видео в реальном времени. Это не концепт, а рабочий прототип, который инженер может собрать и показать в действии.</p>
             </div>
-            <div class="chart">
-              <div class="line">
-                <svg viewBox="0 0 500 160" preserveAspectRatio="none">
-                  <path stroke="#6de2ff" d="M0,120 C40,115 70,60 110,72 C150,84 180,130 220,122 C260,114 290,48 330,52 C370,56 410,100 450,86 C470,78 485,40 500,46"></path>
-                  <path class="secondary" d="M0,105 C35,92 78,100 112,88 C146,76 176,58 215,66 C254,74 295,120 332,118 C370,116 405,70 450,62 C474,58 487,56 500,52"></path>
-                </svg>
-              </div>
+            <div class="demo-shot">
+              <img src="assets/helmet-detector.png" alt="Демонстрация мини-приложения для определения наличия каски" />
             </div>
             <div class="log-list">
-              <div class="log-item"><span class="dot warn"></span><span>Отклонение режима: рост температуры при снижении расхода и неизменной нагрузке</span><span>08:32</span></div>
-              <div class="log-item"><span class="dot"></span><span>Автовывод: ключевая связка "расход охлаждения ↓ / температура ↑ / вибрация +6%"</span><span>AI</span></div>
-              <div class="log-item"><span class="dot safe"></span><span>Рекомендация: проверить контур охлаждения, положение арматуры и допустимо скорректировать нагрузку на 3-5%</span><span>AI</span></div>
+              <div class="log-item"><span class="dot safe"></span><span>Реальная демонстрация: система выделяет работников в кадре и показывает наличие или отсутствие каски</span><span>Пример</span></div>
+              <div class="log-item"><span class="dot"></span><span>Такие решения можно быстро собирать под локальную задачу станции без долгого внешнего внедрения</span><span>Подход</span></div>
+              <div class="log-item"><span class="dot warn"></span><span>Тот же подход масштабируется на контроль операций, фиксацию дефектов, расчёты режимов и другие инженерные идеи</span><span>Эффект</span></div>
             </div>
           </div>
         </div>
